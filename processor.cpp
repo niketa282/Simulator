@@ -2,17 +2,26 @@
 #include <cassert>
 #include <iostream>
 
-std::string Processor::runInstruction(Instruction const& instr) {
+void Emulator::Processor::runInstruction(Instruction const& instr) {
 switch(instr.op) {
-case Instruction::NOP:
-    return "NOP";
 
-case Instruction::Add:
-     assert(instr.operandRegNum[0] < registerBank.size());
-     assert(instr.operandRegNum[1] < registerBank.size());
-     assert(instr.operandRegNum[2] < registerBank.size());
-     registerBank[instr.operandRegNum[0]] = registerBank[instr.operandRegNum[1]] + registerBank[instr.operandRegNum[2]];
-     std::cout << "dest reg val is " <<  registerBank[instr.operandRegNum[0]] << "\n";
-     return "ADD";
+case Instruction::NOP:
+  break;
+
+case Instruction::ADD:
+ registerBank[instr.operandRegNum[0]] = registerBank[instr.operandRegNum[1]] + registerBank[instr.operandRegNum[2]];
+  if(registerBank[instr.operandRegNum[0]] == MIN) {
+    overflow = true;
   }
+  break;
+
+case Instruction::SUB:
+  registerBank[instr.operandRegNum[0]] = registerBank[instr.operandRegNum[1]] - registerBank[instr.operandRegNum[2]];
+  if(registerBank[instr.operandRegNum[0]] == MAX) {
+    underflow = true;
+  }
+  break;
+
+}
+
 }
