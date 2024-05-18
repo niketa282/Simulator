@@ -100,3 +100,28 @@ TEST(Processor, CheckInstructionSTORE) {
   p.runInstruction(i);
   EXPECT_EQ(memory.Read8BitMemory(address), 40);
 }
+
+TEST(Processor, CheckInstructionCMP) {
+  Processor p{};
+  Instruction i{Instruction::CMP, 1, 2, 0, 0, nullptr};
+  auto &registerBank = p.getRegisterBank();
+  registerBank[i.srcReg1]= 5;
+  registerBank[i.srcReg2] = 12;
+  p.runInstruction(i);
+  EXPECT_EQ(p.getEqualFlag(), false);
+}
+
+TEST(Processor, CheckInstructionHALT) {
+  Processor p{};
+  Instruction i{Instruction::HALT};
+  p.runInstruction(i);
+  EXPECT_EQ(p.getHaltFlag(), true);
+}
+
+TEST(Processor, CheckInstructionJMP) {
+  Processor p{};
+  unsigned char addr = 0x11;
+  Instruction i{Instruction::JMP,0, 0, 0, 0, &addr};
+  p.runInstruction(i);
+  EXPECT_EQ(p.getProgramCounter(), 0x11);
+}

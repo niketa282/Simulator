@@ -46,6 +46,23 @@ case Instruction::STORE:
   break;
 }
 
+case Instruction::CMP:
+{
+  registerBank[instr.srcReg1] == registerBank[instr.srcReg2] ? equalFlag = true : equalFlag = false;
+  break;
+}
+
+case Instruction::HALT:
+{
+  haltFlag = true;
+  break;
+}
+
+case Instruction::JMP:
+{
+  ProgramCounter = *instr.address;
+  break;
+}
 
 }
 }

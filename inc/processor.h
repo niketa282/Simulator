@@ -17,7 +17,7 @@ namespace Emulator {
 // incase LDI wants to choose between immediate val and address can add another unsigned char
 // to choose in run instruction case statement
 struct Instruction {
-  enum Operation : char {NOP, ADD, SUB, LOAD, LDI, STORE} op;
+  enum Operation : char {NOP, ADD, SUB, LOAD, LDI, STORE, CMP, HALT, JMP} op;
   unsigned char srcReg1 = 0;
   unsigned char srcReg2 = 0;
   unsigned char destReg = 0;
@@ -40,12 +40,21 @@ class Processor {
 
   inline bool getOverflowCondition() const {return overflow;}
 
+  inline bool getEqualFlag() const {return equalFlag;}
+
+  inline bool getHaltFlag() const {return haltFlag;}
+
+  inline unsigned char& getProgramCounter() {return ProgramCounter;}
+
  private:
   // 32 general purpose 8 bit registers
   std::array<unsigned char,32> registerBank;
   Memory m;
   bool underflow = false;
   bool overflow = false;
+  bool equalFlag = false;
+  bool haltFlag = false;
+  unsigned char ProgramCounter;
 };
 } // namespace::Emulator
 #endif //PROCESSOR_H
