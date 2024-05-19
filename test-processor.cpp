@@ -9,7 +9,7 @@ TEST(Processor, CheckInstructionNOP) {
   Processor p{};
   auto &registerBank = p.getRegisterBank();
   p.runInstruction(i);
-  EXPECT_EQ(registerBank.size(), 32);
+  EXPECT_EQ(registerBank.size(), 16);
   EXPECT_EQ(p.getUnderflowCondition(), false);
   EXPECT_EQ(p.getOverflowCondition(), false);
 }
@@ -19,19 +19,19 @@ TEST(Processor, CheckInstructionADD) {
   Processor p{};
   auto &registerBank = p.getRegisterBank();
 
-  registerBank[i.srcReg1] = 3;
-  registerBank[i.srcReg2] = 4;
-  registerBank[i.destReg] = 0xde;
+  registerBank[i.Reg1] = 3;
+  registerBank[i.Reg2] = 4;
+  registerBank[i.Reg3] = 0xde;
 
   p.runInstruction(i);
-  EXPECT_EQ(registerBank[i.destReg], 7);
+  EXPECT_EQ(registerBank[i.Reg3], 7);
 
-  registerBank[i.srcReg1] = 254;
-  registerBank[i.srcReg2] = 5;
-  registerBank[i.destReg] = 0xde;
+  registerBank[i.Reg1] = 254;
+  registerBank[i.Reg2] = 5;
+  registerBank[i.Reg3] = 0xde;
 
   p.runInstruction(i);
-  EXPECT_EQ(static_cast<int>(registerBank[i.destReg]), 3);
+  EXPECT_EQ(static_cast<int>(registerBank[i.Reg3]), 3);
   EXPECT_EQ(p.getOverflowCondition(), true);
 }
 
@@ -40,18 +40,18 @@ TEST(Processor, CheckInstructionSUBO) {
   Processor p{};
   auto &registerBank = p.getRegisterBank();
 
-  registerBank[i.srcReg1] = 100;
-  registerBank[i.srcReg2] = 44;
-  registerBank[i.destReg] = 0xde;
+  registerBank[i.Reg1] = 100;
+  registerBank[i.Reg2] = 44;
+  registerBank[i.Reg3] = 0xde;
   p.runInstruction(i);
   EXPECT_EQ(registerBank[3], 56);
 
-  registerBank[i.srcReg1] = 3;
-  registerBank[i.srcReg2] = 4;
-  registerBank[i.destReg] = 0xde;
+  registerBank[i.Reg1] = 3;
+  registerBank[i.Reg2] = 4;
+  registerBank[i.Reg3] = 0xde;
 
   p.runInstruction(i);
-  EXPECT_EQ(registerBank[i.destReg], 255);
+  EXPECT_EQ(registerBank[i.Reg3], 255);
   EXPECT_EQ(p.getUnderflowCondition(), true);
 
 }
@@ -59,54 +59,53 @@ TEST(Processor, CheckInstructionSUBO) {
 TEST(Processor, CheckReadWriteMemory) {
  Emulator::Memory m{};
  unsigned char addr = 0x01;
- unsigned char* address = &addr;
- m.Write8BitMemory(address, 5);
- EXPECT_EQ(m.Read8BitMemory(address), 5);
+ m.Write8BitMemory(0x01, 5);
+ EXPECT_EQ(m.Read8BitMemory(addr), 5);
 
  // clear memory and test read returns default value of "0xde"
- std::unordered_map<unsigned char*, unsigned char>& memory = m.getMemoryMap();
+ std::unordered_map<unsigned char, unsigned char>& memory = m.getMemoryMap();
  memory.clear();
- EXPECT_EQ(m.Read8BitMemory(address), 0xde);
+ EXPECT_EQ(m.Read8BitMemory(addr), 0xde);
 }
 
 TEST(Processor, CheckInstructionLOAD) {
   Processor p{};
   auto &memory = p.getMemory();
   unsigned char addr = 0x04;
-  unsigned char* address = &addr;
-  memory.Write8BitMemory(address, 12);
-  Instruction i{Instruction::LOAD, 0, 0, 3, 0,address};
+  memory.Write8BitMemory(addr, 12);
+  Instruction i{Instruction::LOAD, 0, 0, 3, addr};
   auto &registerBank = p.getRegisterBank();
   p.runInstruction(i);
-  EXPECT_EQ(registerBank[i.destReg], 12);
+  EXPECT_EQ(registerBank[i.Reg3], 12);
 }
 
 TEST(Processor, CheckInstructionLDI) {
   Processor p{};
-  Instruction i{Instruction::LDI, 0, 0, 3, 0x5, nullptr};
+  Instruction i{Instruction::LDI, 0, 0, 3, 0x5};
+  auto x = static_cast<int>(i.op);
+  std::cout << "checking val of instr " << x << "\n";
   auto &registerBank = p.getRegisterBank();
   p.runInstruction(i);
-  EXPECT_EQ(registerBank[i.destReg], 0x5);
+  EXPECT_EQ(registerBank[i.Reg3], 0x5);
 }
 
 TEST(Processor, CheckInstructionSTORE) {
   Processor p{};
   auto &memory = p.getMemory();
   unsigned char addr = 0x11;
-  unsigned char* address = &addr;
-  Instruction i{Instruction::STORE, 0, 0, 3, 0, address};
+  Instruction i{Instruction::STORE, 0, 0, 3, addr};
   auto &registerBank = p.getRegisterBank();
-  registerBank[i.destReg]= 40;
+  registerBank[i.Reg3]= 40;
   p.runInstruction(i);
-  EXPECT_EQ(memory.Read8BitMemory(address), 40);
+  EXPECT_EQ(memory.Read8BitMemory(addr), 40);
 }
 
 TEST(Processor, CheckInstructionCMP) {
   Processor p{};
-  Instruction i{Instruction::CMP, 1, 2, 0, 0, nullptr};
+  Instruction i{Instruction::CMP, 1, 2, 0};
   auto &registerBank = p.getRegisterBank();
-  registerBank[i.srcReg1]= 5;
-  registerBank[i.srcReg2] = 12;
+  registerBank[i.Reg1]= 5;
+  registerBank[i.Reg2] = 12;
   p.runInstruction(i);
   EXPECT_EQ(p.getEqualFlag(), false);
 }
@@ -121,7 +120,65 @@ TEST(Processor, CheckInstructionHALT) {
 TEST(Processor, CheckInstructionJMP) {
   Processor p{};
   unsigned char addr = 0x11;
-  Instruction i{Instruction::JMP,0, 0, 0, 0, &addr};
+  Instruction i{Instruction::JMP,0, 0, 0, addr};
   p.runInstruction(i);
   EXPECT_EQ(p.getProgramCounter(), 0x11);
+}
+
+TEST(Processor, populateInstructionMemory) {
+  Processor p{};
+  auto &instructionMemory = p.getInstructionMemory();
+  EXPECT_EQ(instructionMemory.size(), 0);
+  p.populateInstructionMemory("binaryDataTest.txt");
+  EXPECT_EQ(instructionMemory.size(), 3);
+  for(auto& iMem: instructionMemory)
+  {
+    EXPECT_EQ(iMem.size(), 16);
+  }
+}
+
+TEST(Processor, fetchInstruction) {
+  Processor p{};
+  auto &ProgramCounter = p.getProgramCounter();
+  ProgramCounter = 2;
+  p.populateInstructionMemory("binaryDataTest.txt");
+  p.fetchInstruction(ProgramCounter);
+  EXPECT_EQ(p.fetchInstruction(ProgramCounter), "0011000101110000");
+}
+
+TEST(Processor, decodeInstructions) {
+  Processor p{};
+  Instruction i{};
+  auto &ProgramCounter = p.getProgramCounter();
+  p.populateInstructionMemory("InstructionsDecodingData.txt");
+  std::string Instruction = p.fetchInstruction(ProgramCounter);
+  EXPECT_EQ(i.op, Instruction::NOP);
+
+  ProgramCounter = 2;
+  Instruction = p.fetchInstruction(ProgramCounter);
+  i = p.decodeInstruction(Instruction);
+  EXPECT_EQ(i.op, Instruction::LOAD);
+  EXPECT_EQ(i.Reg3, 4);
+  EXPECT_EQ(i.immediateOrAddress, 2);
+
+  ProgramCounter = 3;
+  Instruction = p.fetchInstruction(ProgramCounter);
+  i = p.decodeInstruction(Instruction);
+  EXPECT_EQ(i.op, Instruction::ADD);
+  EXPECT_EQ(i.Reg1, 2);
+  EXPECT_EQ(i.Reg2, 3);
+  EXPECT_EQ(i.Reg3, 5);
+
+  ProgramCounter = 4;
+  Instruction = p.fetchInstruction(ProgramCounter);
+  i = p.decodeInstruction(Instruction);
+  EXPECT_EQ(i.op, Instruction::CMP);
+  EXPECT_EQ(i.Reg1, 6);
+  EXPECT_EQ(i.Reg2, 7);
+
+  ProgramCounter = 5;
+  Instruction = p.fetchInstruction(ProgramCounter);
+  i = p.decodeInstruction(Instruction);
+  EXPECT_EQ(i.op, Instruction::JMP);
+  EXPECT_EQ(i.immediateOrAddress, 2);
 }
