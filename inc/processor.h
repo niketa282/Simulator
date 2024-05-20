@@ -8,17 +8,14 @@
 #include "memory.h"
 namespace Emulator {
 
-// incase LDI wants to choose between immediate val and address can add another unsigned char
-// to choose in run instruction case statement
+// Single Instruction struct, that is populated based on opcode in Decode function
 struct Instruction {
   enum Operation : char {NOP, ADD, SUB, LOAD, LDI, STORE, CMP, HALT, JMP} op;
-  unsigned char Reg1 = 0;
-  unsigned char Reg2 = 0;
-  unsigned char Reg3 = 0;
+  std::array<unsigned char,3> operandRegNum;
   unsigned char immediateOrAddress = 0;
-  // unsigned char* address = nullptr;
 };
 
+// Main Processor class that runs
 class Processor {
  public:
   static constexpr int MIN = 0;
@@ -47,14 +44,13 @@ class Processor {
 
   void runInstruction(Instruction const& instr, bool debug = false);
 
- void Execute(std::string const& filename);
+  void Execute(std::string const& filename);
 
   Emulator::Instruction decodeInstruction(std::string const& Instruction);
 
  private:
-  // 32 general purpose 8 bit registers
+  // 16 general purpose 8 bit registers
   std::array<unsigned char,16> registerBank;
-  // Instruction memory (2 bytes)
   std::vector<std::string> InstructionMemory;
   Memory m;
   bool underflow = false;

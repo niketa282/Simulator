@@ -19,19 +19,19 @@ TEST(Processor, CheckInstructionADD) {
   Processor p{};
   auto &registerBank = p.getRegisterBank();
 
-  registerBank[i.Reg1] = 3;
-  registerBank[i.Reg2] = 4;
-  registerBank[i.Reg3] = 0xde;
+  registerBank[i.operandRegNum[0]] = 3;
+  registerBank[i.operandRegNum[1]] = 4;
+  registerBank[i.operandRegNum[2]] = 0xde;
 
   p.runInstruction(i);
-  EXPECT_EQ(registerBank[i.Reg3], 7);
+  EXPECT_EQ(registerBank[i.operandRegNum[2]], 7);
 
-  registerBank[i.Reg1] = 254;
-  registerBank[i.Reg2] = 5;
-  registerBank[i.Reg3] = 0xde;
+  registerBank[i.operandRegNum[0]] = 254;
+  registerBank[i.operandRegNum[1]] = 5;
+  registerBank[i.operandRegNum[2]] = 0xde;
 
   p.runInstruction(i);
-  EXPECT_EQ(static_cast<int>(registerBank[i.Reg3]), 3);
+  EXPECT_EQ(static_cast<int>(registerBank[i.operandRegNum[2]]), 3);
   EXPECT_EQ(p.getOverflowCondition(), true);
 }
 
@@ -40,18 +40,18 @@ TEST(Processor, CheckInstructionSUBO) {
   Processor p{};
   auto &registerBank = p.getRegisterBank();
 
-  registerBank[i.Reg1] = 100;
-  registerBank[i.Reg2] = 44;
-  registerBank[i.Reg3] = 0xde;
+  registerBank[i.operandRegNum[0]] = 100;
+  registerBank[i.operandRegNum[1]] = 44;
+  registerBank[i.operandRegNum[2]] = 0xde;
   p.runInstruction(i);
   EXPECT_EQ(registerBank[3], 56);
 
-  registerBank[i.Reg1] = 3;
-  registerBank[i.Reg2] = 4;
-  registerBank[i.Reg3] = 0xde;
+  registerBank[i.operandRegNum[0]] = 3;
+  registerBank[i.operandRegNum[1]] = 4;
+  registerBank[i.operandRegNum[2]] = 0xde;
 
   p.runInstruction(i);
-  EXPECT_EQ(registerBank[i.Reg3], 255);
+  EXPECT_EQ(registerBank[i.operandRegNum[2]], 255);
   EXPECT_EQ(p.getUnderflowCondition(), true);
 
 }
@@ -61,11 +61,7 @@ TEST(Processor, CheckReadWriteMemory) {
  unsigned char addr = 0x01;
  m.Write8BitMemory(0x01, 5);
  EXPECT_EQ(m.Read8BitMemory(addr), 5);
-
- // clear memory and test read returns default value of "0xde"
- std::unordered_map<unsigned char, unsigned char>& memory = m.getMemoryMap();
- memory.clear();
- EXPECT_EQ(m.Read8BitMemory(addr), 0xde);
+ EXPECT_EQ(m.Read8BitMemory(0x02), 0xde);
 }
 
 TEST(Processor, CheckInstructionLOAD) {
@@ -76,7 +72,7 @@ TEST(Processor, CheckInstructionLOAD) {
   Instruction i{Instruction::LOAD, 0, 0, 3, addr};
   auto &registerBank = p.getRegisterBank();
   p.runInstruction(i);
-  EXPECT_EQ(registerBank[i.Reg3], 12);
+  EXPECT_EQ(registerBank[i.operandRegNum[2]], 12);
 }
 
 TEST(Processor, CheckInstructionLDI) {
@@ -86,7 +82,7 @@ TEST(Processor, CheckInstructionLDI) {
   std::cout << "checking val of instr " << x << "\n";
   auto &registerBank = p.getRegisterBank();
   p.runInstruction(i);
-  EXPECT_EQ(registerBank[i.Reg3], 0x5);
+  EXPECT_EQ(registerBank[i.operandRegNum[2]], 0x5);
 }
 
 TEST(Processor, CheckInstructionSTORE) {
@@ -95,7 +91,7 @@ TEST(Processor, CheckInstructionSTORE) {
   unsigned char addr = 0x11;
   Instruction i{Instruction::STORE, 0, 0, 3, addr};
   auto &registerBank = p.getRegisterBank();
-  registerBank[i.Reg3]= 40;
+  registerBank[i.operandRegNum[2]]= 40;
   p.runInstruction(i);
   EXPECT_EQ(memory.Read8BitMemory(addr), 40);
 }
@@ -104,8 +100,8 @@ TEST(Processor, CheckInstructionCMP) {
   Processor p{};
   Instruction i{Instruction::CMP, 1, 2, 0};
   auto &registerBank = p.getRegisterBank();
-  registerBank[i.Reg1]= 5;
-  registerBank[i.Reg2] = 12;
+  registerBank[i.operandRegNum[0]]= 5;
+  registerBank[i.operandRegNum[1]] = 12;
   p.runInstruction(i);
   EXPECT_EQ(p.getEqualFlag(), false);
 }
@@ -129,7 +125,7 @@ TEST(Processor, populateInstructionMemory) {
   Processor p{};
   auto &instructionMemory = p.getInstructionMemory();
   EXPECT_EQ(instructionMemory.size(), 0);
-  p.populateInstructionMemory("binaryDataTest.txt");
+  p.populateInstructionMemory("files/binaryDataTest.txt");
   EXPECT_EQ(instructionMemory.size(), 3);
   for(auto& iMem: instructionMemory)
   {
@@ -141,7 +137,7 @@ TEST(Processor, fetchInstruction) {
   Processor p{};
   auto &ProgramCounter = p.getProgramCounter();
   ProgramCounter = 2;
-  p.populateInstructionMemory("binaryDataTest.txt");
+  p.populateInstructionMemory("files/binaryDataTest.txt");
   p.fetchInstruction(ProgramCounter);
   EXPECT_EQ(p.fetchInstruction(ProgramCounter), "0011000101110000");
 }
@@ -150,7 +146,7 @@ TEST(Processor, decodeInstructions) {
   Processor p{};
   Instruction i{};
   auto &ProgramCounter = p.getProgramCounter();
-  p.populateInstructionMemory("InstructionsDecodingData.txt");
+  p.populateInstructionMemory("files/InstructionsDecodingData.txt");
   std::string Instruction = p.fetchInstruction(ProgramCounter);
   EXPECT_EQ(i.op, Instruction::NOP);
 
@@ -158,30 +154,30 @@ TEST(Processor, decodeInstructions) {
   Instruction = p.fetchInstruction(ProgramCounter);
   i = p.decodeInstruction(Instruction);
   EXPECT_EQ(i.op, Instruction::LDI);
-  EXPECT_EQ(i.Reg3, 2);
+  EXPECT_EQ(i.operandRegNum[2], 2);
   EXPECT_EQ(i.immediateOrAddress, 10);
 
   ProgramCounter = 2;
   Instruction = p.fetchInstruction(ProgramCounter);
   i = p.decodeInstruction(Instruction);
   EXPECT_EQ(i.op, Instruction::LOAD);
-  EXPECT_EQ(i.Reg3, 4);
+  EXPECT_EQ(i.operandRegNum[2], 4);
   EXPECT_EQ(i.immediateOrAddress, 2);
 
   ProgramCounter = 3;
   Instruction = p.fetchInstruction(ProgramCounter);
   i = p.decodeInstruction(Instruction);
   EXPECT_EQ(i.op, Instruction::ADD);
-  EXPECT_EQ(i.Reg1, 2);
-  EXPECT_EQ(i.Reg2, 3);
-  EXPECT_EQ(i.Reg3, 5);
+  EXPECT_EQ(i.operandRegNum[0], 2);
+  EXPECT_EQ(i.operandRegNum[1], 3);
+  EXPECT_EQ(i.operandRegNum[2], 5);
 
   ProgramCounter = 4;
   Instruction = p.fetchInstruction(ProgramCounter);
   i = p.decodeInstruction(Instruction);
   EXPECT_EQ(i.op, Instruction::CMP);
-  EXPECT_EQ(i.Reg1, 6);
-  EXPECT_EQ(i.Reg2, 7);
+  EXPECT_EQ(i.operandRegNum[0], 6);
+  EXPECT_EQ(i.operandRegNum[1], 7);
 
   ProgramCounter = 5;
   Instruction = p.fetchInstruction(ProgramCounter);
@@ -192,7 +188,7 @@ TEST(Processor, decodeInstructions) {
 
 TEST(Processor, ExecuteInstruction) {
   Processor p{};
-  p.Execute("SimpleAddTest.txt");
+  p.Execute("files/SimpleAddTest.txt");
   auto &instructionMemory = p.getInstructionMemory();
   EXPECT_EQ(instructionMemory.size(), 4);
 }

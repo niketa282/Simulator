@@ -15,16 +15,16 @@ case Instruction::ADD:
   if (debug)
   {
    std::cout << "ADD \n";
-   std::cout << "Value in " << int{instr.Reg1} << " is " << int{registerBank[instr.Reg1]} << "\n";
-   std::cout << "Value in " << int{instr.Reg2} << " is " << int{registerBank[instr.Reg2]} << "\n";
-   std::cout << " Output into Reg "<< int{instr.Reg3} << "= " << int{registerBank[instr.Reg1]} << "+" << int{registerBank[instr.Reg2]} << "\n";
+   std::cout << "Value in Reg " << int{instr.operandRegNum[0]} << " is " << int{registerBank[instr.operandRegNum[0]]} << "\n";
+   std::cout << "Value in Reg " << int{instr.operandRegNum[1]} << " is " << int{registerBank[instr.operandRegNum[1]]} << "\n";
+   std::cout << "Output into Reg "<< int{instr.operandRegNum[2]} << " = " << int{registerBank[instr.operandRegNum[0]]} << "+" << int{registerBank[instr.operandRegNum[1]]} << "\n";
   }
-  auto add = static_cast<int>(registerBank[instr.Reg1]) + static_cast<int>(registerBank[instr.Reg2]);
+  auto add = static_cast<int>(registerBank[instr.operandRegNum[0]]) + static_cast<int>(registerBank[instr.operandRegNum[1]]);
   if (add > MAX) {
     overflow = true;
   }
-  registerBank[instr.Reg3] = registerBank[instr.Reg1] + registerBank[instr.Reg2];
-  if (debug) std::cout << "Value in Reg " << int{instr.Reg3} << " is " << int{registerBank[instr.Reg3]} << "\n";
+  registerBank[instr.operandRegNum[2]] = registerBank[instr.operandRegNum[0]] + registerBank[instr.operandRegNum[1]];
+  if (debug) std::cout << "Value in Reg " << int{instr.operandRegNum[2]} << " is " << int{registerBank[instr.operandRegNum[2]]} << "\n";
   break;
 }
 
@@ -33,13 +33,14 @@ case Instruction::SUB:
   if (debug)
   {
     std::cout << "SUB \n";
-    std::cout << " Output into Reg " << int{instr.Reg3} << int{registerBank[instr.Reg1]} << "-" << int{registerBank[instr.Reg2]} << "\n";
+    std::cout << "Output in Reg " << int{instr.operandRegNum[2]} << " = " << int{registerBank[instr.operandRegNum[0]]} << " - " << int{registerBank[instr.operandRegNum[1]]} << "\n";
   }
-  auto diff =  static_cast<int>(registerBank[instr.Reg1]) - static_cast<int>(registerBank[instr.Reg2]);
+  auto diff =  static_cast<int>(registerBank[instr.operandRegNum[0]]) - static_cast<int>(registerBank[instr.operandRegNum[1]]);
   if (diff < MIN) {
      underflow = true;
   }
-  registerBank[instr.Reg3] = registerBank[instr.Reg1] - registerBank[instr.Reg2];
+  registerBank[instr.operandRegNum[2]] = registerBank[instr.operandRegNum[0]] - registerBank[instr.operandRegNum[1]];
+  if (debug) std::cout << "Value in Reg " << int{instr.operandRegNum[2]} << " is " << int{registerBank[instr.operandRegNum[2]]} << "\n";
   break;
 }
 
@@ -47,11 +48,11 @@ case Instruction::LOAD:
 {
   if (debug)
   {
-    std::cout << " LOAD \n";
-    std::cout << " Load into Reg " << int{instr.Reg3} << " an address of" << int{instr.immediateOrAddress} << "\n";
-    std::cout << " Value read is " << int{m.Read8BitMemory(instr.immediateOrAddress)} << "\n";
+    std::cout << "LOAD \n";
+    std::cout << "Load into Reg " << int{instr.operandRegNum[2]} << " an address of " << int{instr.immediateOrAddress} << "\n";
+    std::cout << "Value read is " << int{m.Read8BitMemory(instr.immediateOrAddress)} << "\n";
   }
-  registerBank[instr.Reg3] = m.Read8BitMemory(instr.immediateOrAddress);
+  registerBank[instr.operandRegNum[2]] = m.Read8BitMemory(instr.immediateOrAddress);
   break;
 }
 
@@ -60,9 +61,9 @@ case Instruction::LDI:
   if (debug)
   {
     std::cout << "LDI \n";
-    std::cout << "Load into Reg " << int{instr.Reg3} << " an immediate value of" << int{instr.immediateOrAddress} << "\n";
+    std::cout << "Load into Reg " << int{instr.operandRegNum[2]} << " an immediate value of " << int{instr.immediateOrAddress} << "\n";
   }
-  registerBank[instr.Reg3] = instr.immediateOrAddress;
+  registerBank[instr.operandRegNum[2]] = instr.immediateOrAddress;
   break;
 }
 
@@ -71,10 +72,9 @@ case Instruction::STORE:
   if (debug)
   {
     std::cout << "STORE \n";
-    std::cout << "Store from Reg " << int{instr.Reg3} << "into address at " << int{instr.immediateOrAddress} << "\n";
- //   std::cout << "Value being written is " << m.Write8BitMemory(instr.immediateOrAddress, registerBank[instr.Reg3]) << "\n";
+    std::cout << "Store from Reg " << int{instr.operandRegNum[2]} << " into address at " << int{instr.immediateOrAddress} << "\n";
   }
-  m.Write8BitMemory(instr.immediateOrAddress, registerBank[instr.Reg3]);
+  m.Write8BitMemory(instr.immediateOrAddress, registerBank[instr.operandRegNum[2]]);
   if (debug)
   break;
 }
@@ -84,9 +84,9 @@ case Instruction::CMP:
   if (debug)
   {
     std::cout << "CMP \n";
-    std::cout << "Compare Value " << int{registerBank[instr.Reg1]} << " in Reg " << int{instr.Reg1} << " with Value "<< int{registerBank[instr.Reg2]}<< "in Reg" << int{instr.Reg2} << "\n";
+    std::cout << "Compare Value " << int{registerBank[instr.operandRegNum[0]]} << " in Reg " << int{instr.operandRegNum[0]} << " with Value "<< int{registerBank[instr.operandRegNum[1]]}<< "in Reg" << int{instr.operandRegNum[1]} << "\n";
   }
-  registerBank[instr.Reg1] == registerBank[instr.Reg2] ? equalFlag = true : equalFlag = false;
+  registerBank[instr.operandRegNum[0]] == registerBank[instr.operandRegNum[1]] ? equalFlag = true : equalFlag = false;
   break;
 }
 
@@ -174,21 +174,21 @@ Emulator::Instruction Emulator::Processor::decodeInstruction(std::string const& 
 
     case Instruction::ADD:
     case Instruction::SUB:
-      i.Reg1 = convertStringToChar(Instruction.substr(12,4)).second;
-      i.Reg2 = convertStringToChar(Instruction.substr(8,4)).second;
-      i.Reg3 = convertStringToChar(Instruction.substr(4,4)).second;
+      i.operandRegNum[0] = convertStringToChar(Instruction.substr(12,4)).second;
+      i.operandRegNum[1] = convertStringToChar(Instruction.substr(8,4)).second;
+      i.operandRegNum[2] = convertStringToChar(Instruction.substr(4,4)).second;
       break;
 
     case Instruction::LOAD:
     case Instruction::STORE:
     case Instruction::LDI:
-      i.Reg3 = convertStringToChar(Instruction.substr(4,4)).second;
+      i.operandRegNum[2] = convertStringToChar(Instruction.substr(4,4)).second;
       i.immediateOrAddress = convertStringToChar(Instruction.substr(8,8)).second;
       break;
 
     case Instruction::CMP:
-      i.Reg1 = convertStringToChar(Instruction.substr(4,4)).second;
-      i.Reg2 = convertStringToChar(Instruction.substr(8,4)).second;
+      i.operandRegNum[0] = convertStringToChar(Instruction.substr(4,4)).second;
+      i.operandRegNum[1] = convertStringToChar(Instruction.substr(8,4)).second;
       break;
 
     case Instruction::HALT:
