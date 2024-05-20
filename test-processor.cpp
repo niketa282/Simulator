@@ -154,6 +154,13 @@ TEST(Processor, decodeInstructions) {
   std::string Instruction = p.fetchInstruction(ProgramCounter);
   EXPECT_EQ(i.op, Instruction::NOP);
 
+  ProgramCounter = 1;
+  Instruction = p.fetchInstruction(ProgramCounter);
+  i = p.decodeInstruction(Instruction);
+  EXPECT_EQ(i.op, Instruction::LDI);
+  EXPECT_EQ(i.Reg3, 2);
+  EXPECT_EQ(i.immediateOrAddress, 10);
+
   ProgramCounter = 2;
   Instruction = p.fetchInstruction(ProgramCounter);
   i = p.decodeInstruction(Instruction);
@@ -181,4 +188,11 @@ TEST(Processor, decodeInstructions) {
   i = p.decodeInstruction(Instruction);
   EXPECT_EQ(i.op, Instruction::JMP);
   EXPECT_EQ(i.immediateOrAddress, 2);
+}
+
+TEST(Processor, ExecuteInstruction) {
+  Processor p{};
+  p.Execute("SimpleAddTest.txt");
+  auto &instructionMemory = p.getInstructionMemory();
+  EXPECT_EQ(instructionMemory.size(), 4);
 }

@@ -3,26 +3,40 @@
 #include <sstream>
 #include "processor.h"
 
-void Emulator::Processor::runInstruction(Instruction const& instr) {
+void Emulator::Processor::runInstruction(Instruction const& instr, bool debug) {
 switch(instr.op) {
 
 case Instruction::NOP:
+  if (debug) std::cout << "NOP \n";
   break;
 
 case Instruction::ADD:
 {
+  if (debug)
+  {
+   std::cout << "ADD \n";
+   std::cout << "Value in " << int{instr.Reg1} << " is " << int{registerBank[instr.Reg1]} << "\n";
+   std::cout << "Value in " << int{instr.Reg2} << " is " << int{registerBank[instr.Reg2]} << "\n";
+   std::cout << " Output into Reg "<< int{instr.Reg3} << "= " << int{registerBank[instr.Reg1]} << "+" << int{registerBank[instr.Reg2]} << "\n";
+  }
   auto add = static_cast<int>(registerBank[instr.Reg1]) + static_cast<int>(registerBank[instr.Reg2]);
-  if(add > MAX) {
+  if (add > MAX) {
     overflow = true;
   }
   registerBank[instr.Reg3] = registerBank[instr.Reg1] + registerBank[instr.Reg2];
+  if (debug) std::cout << "Value in Reg " << int{instr.Reg3} << " is " << int{registerBank[instr.Reg3]} << "\n";
   break;
 }
 
 case Instruction::SUB:
 {
+  if (debug)
+  {
+    std::cout << "SUB \n";
+    std::cout << " Output into Reg " << int{instr.Reg3} << int{registerBank[instr.Reg1]} << "-" << int{registerBank[instr.Reg2]} << "\n";
+  }
   auto diff =  static_cast<int>(registerBank[instr.Reg1]) - static_cast<int>(registerBank[instr.Reg2]);
-  if(diff < MIN) {
+  if (diff < MIN) {
      underflow = true;
   }
   registerBank[instr.Reg3] = registerBank[instr.Reg1] - registerBank[instr.Reg2];
@@ -31,36 +45,64 @@ case Instruction::SUB:
 
 case Instruction::LOAD:
 {
- registerBank[instr.Reg3] = m.Read8BitMemory(instr.immediateOrAddress);
+  if (debug)
+  {
+    std::cout << " LOAD \n";
+    std::cout << " Load into Reg " << int{instr.Reg3} << " an address of" << int{instr.immediateOrAddress} << "\n";
+    std::cout << " Value read is " << int{m.Read8BitMemory(instr.immediateOrAddress)} << "\n";
+  }
+  registerBank[instr.Reg3] = m.Read8BitMemory(instr.immediateOrAddress);
   break;
 }
 
 case Instruction::LDI:
 {
+  if (debug)
+  {
+    std::cout << "LDI \n";
+    std::cout << "Load into Reg " << int{instr.Reg3} << " an immediate value of" << int{instr.immediateOrAddress} << "\n";
+  }
   registerBank[instr.Reg3] = instr.immediateOrAddress;
   break;
 }
 
 case Instruction::STORE:
 {
+  if (debug)
+  {
+    std::cout << "STORE \n";
+    std::cout << "Store from Reg " << int{instr.Reg3} << "into address at " << int{instr.immediateOrAddress} << "\n";
+ //   std::cout << "Value being written is " << m.Write8BitMemory(instr.immediateOrAddress, registerBank[instr.Reg3]) << "\n";
+  }
   m.Write8BitMemory(instr.immediateOrAddress, registerBank[instr.Reg3]);
+  if (debug)
   break;
 }
 
 case Instruction::CMP:
 {
+  if (debug)
+  {
+    std::cout << "CMP \n";
+    std::cout << "Compare Value " << int{registerBank[instr.Reg1]} << " in Reg " << int{instr.Reg1} << " with Value "<< int{registerBank[instr.Reg2]}<< "in Reg" << int{instr.Reg2} << "\n";
+  }
   registerBank[instr.Reg1] == registerBank[instr.Reg2] ? equalFlag = true : equalFlag = false;
   break;
 }
 
 case Instruction::HALT:
 {
+  if (debug) std::cout << "HALT \n";
   haltFlag = true;
   break;
 }
 
 case Instruction::JMP:
 {
+  if (debug)
+  {
+    std::cout << "JMP " << "Program counter jumps to address " << int{instr.immediateOrAddress} << "\n";
+  }
   ProgramCounter = instr.immediateOrAddress;
   break;
 }
@@ -96,15 +138,16 @@ void Emulator::Processor::populateInstructionMemory(std::string const& filename)
   }
 }
 
-/*void Emulator::Processor::Execute()
+void Emulator::Processor::Execute(std::string const& filename)
 {
+  populateInstructionMemory(filename);
   while (ProgramCounter < InstructionMemory.size() && haltFlag != true) {
-    // fetch instruction
-    // decode
-    // run
-    // ++ProgramCounter
+    std::string Instruction = fetchInstruction(ProgramCounter);
+    Emulator::Instruction i = decodeInstruction(Instruction);
+    runInstruction(i, true);
+    ++ProgramCounter;
   }
-}*/
+}
 
 std::string Emulator::Processor::fetchInstruction(unsigned char const& ProgramCounter) const {
   return InstructionMemory[ProgramCounter];

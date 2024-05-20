@@ -16,7 +16,6 @@ class Memory {
   unsigned char Read8BitMemory(unsigned char address) { return CheckMemorySet(address)? memory[address] : 0xde;}
 
   inline std::unordered_map<unsigned char, unsigned char>& getMemoryMap() {return memory;}
-
  private:
   std::unordered_map<unsigned char, unsigned char> memory;
 };

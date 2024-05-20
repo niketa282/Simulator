@@ -24,7 +24,6 @@ class Processor {
   static constexpr int MIN = 0;
   static constexpr int MAX = 255;
   static constexpr std::size_t BITS = 16;
-  void runInstruction(Instruction const& instr);
 
   inline std::array<unsigned char, 16>& getRegisterBank() {return registerBank;}
 
@@ -46,7 +45,9 @@ class Processor {
 
   std::string fetchInstruction(unsigned char const& ProgramCounter) const;
 
-  // Instruction::Operation convertStringToChar(std::string const& str);
+  void runInstruction(Instruction const& instr, bool debug = false);
+
+ void Execute(std::string const& filename);
 
   Emulator::Instruction decodeInstruction(std::string const& Instruction);
 
