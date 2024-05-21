@@ -3,7 +3,7 @@
 #include <sstream>
 #include "processor.h"
 
-void Emulator::Processor::runInstruction(Instruction const& instr, bool debug) {
+void Emulator::Processor::runInstruction(Instruction const& instr, bool debug, bool printfactorial) {
 switch(instr.op) {
 
 case Instruction::NOP:
@@ -119,7 +119,9 @@ case Instruction::MUL:
   }
   registerBank[instr.operandRegNum[2]] = registerBank[instr.operandRegNum[0]] * registerBank[instr.operandRegNum[1]];
   if (debug) std::cout << "Value in Reg " << int{instr.operandRegNum[2]} << " is " << int{registerBank[instr.operandRegNum[2]]} << "\n";
+  if(printfactorial) std::cout << "Factorial value is " << int{registerBank[instr.operandRegNum[2]]} << "\n";
   break;
+
 }
 
 case Instruction::ADDI:
@@ -167,19 +169,18 @@ void Emulator::Processor::populateInstructionMemory(std::string const& filename)
   }
 }
 
-void Emulator::Processor::Execute(std::string const& filename)
+void Emulator::Processor::Execute(std::string const& filename, bool debug, bool printfactorial)
 {
   populateInstructionMemory(filename);
   while (ProgramCounter < InstructionMemory.size() && haltFlag != true) {
     std::string Instruction = fetchInstruction(ProgramCounter);
     ++ProgramCounter;
     Emulator::Instruction i = decodeInstruction(Instruction);
-    runInstruction(i, true);
+    runInstruction(i, debug, printfactorial);
   }
 }
 
 std::string Emulator::Processor::fetchInstruction(unsigned char const& ProgramCounter) const {
-  std::cout << "PC is "<< int{ProgramCounter} << "\n";
   return InstructionMemory[ProgramCounter];
 }
 

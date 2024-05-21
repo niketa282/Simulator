@@ -8,14 +8,14 @@
 #include "memory.h"
 namespace Emulator {
 
-// Single Instruction struct, that is populated based on opcode in Decode function
+// Single Instruction struct, that is populated based on opcode in Decode function.
 struct Instruction {
   enum Operation : char {NOP, ADD, SUB, LOAD, LDI, STORE, CMP, HALT, JMP, MUL, ADDI} op;;
   std::array<unsigned char,3> operandRegNum;
   unsigned char immediateOrAddress = 0;
 };
 
-// Main Processor class that runs
+// Main Processor class
 class Processor {
  public:
   static constexpr int MIN = 0;
@@ -42,9 +42,9 @@ class Processor {
 
   std::string fetchInstruction(unsigned char const& ProgramCounter) const;
 
-  void runInstruction(Instruction const& instr, bool debug = false);
+  void runInstruction(Instruction const& instr, bool debug = false, bool printfactorial = false);
 
-  void Execute(std::string const& filename);
+  void Execute(std::string const& filename, bool debug = false, bool printfactorial = false);
 
   Emulator::Instruction decodeInstruction(std::string const& Instruction);
 

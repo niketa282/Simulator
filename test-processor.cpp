@@ -136,7 +136,6 @@ TEST(Processor, populateInstructionMemory) {
 TEST(Processor, fetchInstruction) {
   Processor p{};
   auto &ProgramCounter = p.getProgramCounter();
- // ProgramCounter = 2;
   p.populateInstructionMemory("../files/binaryDataTest.txt");
   auto iMem = p.getInstructionMemory();
   std::vector<std::string> output{};
@@ -144,12 +143,9 @@ TEST(Processor, fetchInstruction) {
     output.push_back(p.fetchInstruction(ProgramCounter));
     ++ProgramCounter;
   }
-
   EXPECT_EQ(output[0], "0000000100100011");
   EXPECT_EQ(output[1], "0001010001010110");
   EXPECT_EQ(output[2], "0011000101110000");
-  //p.fetchInstruction(ProgramCounter);
- // EXPECT_EQ(p.fetchInstruction(ProgramCounter), "0011000101110000");
 }
 
 TEST(Processor, decodeInstructions) {
@@ -198,14 +194,21 @@ TEST(Processor, decodeInstructions) {
 
 TEST(Processor, ExecuteInstructionAddTest) {
   Processor p{};
-  p.Execute("../files/SimpleAddTest.txt");
+  p.Execute("../files/SimpleAddTest.txt", true, false);
   auto &instructionMemory = p.getInstructionMemory();
   EXPECT_EQ(instructionMemory.size(), 4);
 }
 
-TEST(Processor, ExecuteInstructionFactorialTest) {
+TEST(Processor, ExecuteInstructionFactorialTestDebugging) {
   Processor p{};
-  p.Execute("../files/SimpleFactorialAssembly.txt");
+  p.Execute("../files/SimpleFactorialAssembly.txt", true, false);
+  auto &instructionMemory = p.getInstructionMemory();
+  EXPECT_EQ(instructionMemory.size(), 8);
+}
+
+TEST(Processor, ExecuteInstructionFactorialTestOutput) {
+  Processor p{};
+  p.Execute("../files/SimpleFactorialAssembly.txt", false, true);
   auto &instructionMemory = p.getInstructionMemory();
   EXPECT_EQ(instructionMemory.size(), 8);
 }
