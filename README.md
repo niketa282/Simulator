@@ -19,18 +19,18 @@ A snippet of the expected output when building and running the program.
 
 Instruction Set Architecture
 -----------------------------
-The instruction set consists of the following instructions
-(NOP) no operation
-(ADD) addition
-(SUB) subtraction
-(LOAD) loading from memory address into a register
-(LDI) loading an immediate value into a register
-(STORE) storing from register into memory address
-(CMP) comparing data in two registers and updating a flag
-(HALT) stop machine
-(JMP) reset next instruction by changing value of Program counter based of address held in the instruction
-(MUL) multiplication
-(ADDI) addition of a immediate value
+The instruction set consists of the following instructions<br/>
+(NOP) no operation<br/>
+(ADD) addition<br/>
+(SUB) subtraction<br/>
+(LOAD) loading from memory address into a register<br/>
+(LDI) loading an immediate value into a register<br/>
+(STORE) storing from register into memory address<br/>
+(CMP) comparing data in two registers and updating a flag<br/>
+(HALT) stop machine<br/>
+(JMP) reset next instruction by changing value of Program counter based of address held in the instruction<br/>
+(MUL) multiplication<br/>
+(ADDI) addition of a immediate value<br/>
 
 The instruction is reprsented by a struct that consists of three fields.
 The first field is an enum representing the opcode of the different instructions. The second field represents the operand registers eg. r1, r2 ect. The third field is used to represent either an immediate value or an address depending on opcode of instruction. For example LOAD, STORE and JMP use it to respresent the address while LDI, ADDI use it for the immediat value.
@@ -38,42 +38,42 @@ The first field is an enum representing the opcode of the different instructions
 The size of the instruction struct is 4 bytes.
 However all the 4 bytes are not used by each instruction type. The instructions are 2 bytes (16 bits) in size.
 
-ADD/SUB/MUL
-4 bits => opcode
-4 bits => srcReg1, srcReg2, destReg
+ADD/SUB/MUL<br/>
+4 bits => opcode<br/>
+4 bits => srcReg1, srcReg2, destReg<br/>
 
-LOAD/STORE
-4 bits => opcode
-4 bits => destReg
-8 bits => address
+LOAD/STORE<br/>
+4 bits => opcode<br/>
+4 bits => destReg<br/>
+8 bits => address<br/>
 
-LDI
-4 bits => opcode
-4 bits => destReg
-8 bits => immediate
+LDI<br/>
+4 bits => opcode<br/>
+4 bits => destReg<br/>
+8 bits => immediate<br/>
 
-CMP
-4 bits => opcode
-4 bits => srcReg1, srcReg2
-lowest 4 bits are unused
+CMP<br/>
+4 bits => opcode<br/>
+4 bits => srcReg1, srcReg2<br/>
+lowest 4 bits are unused<br/>
 
-NOP/HALT
-4 bits => opcode
-Rest of the bits are unused
+NOP/HALT<br/>
+4 bits => opcode<br/>
+Rest of the bits are unused<br/>
 
-JMP
-4 bits => opcode
-8 bits => address
-lowest 4 bits are unused
+JMP<br/>
+4 bits => opcode<br/>
+8 bits => address<br/>
+lowest 4 bits are unused<br/>
 
-ADDI
-4 bits => opcode
-4 bits => destReg, srcReg2
-4 bits => immediate
+ADDI<br/>
+4 bits => opcode<br/>
+4 bits => destReg, srcReg2<br/>
+4 bits => immediate<br/>
 
 File Structure
 -----------------------------
-CMakeLists.txt - Describes build system.
+CMakeLists.txt - Describes the build system.
 
 googletest-release-1.12.1 - GoogleTest library using for testing.
 
@@ -83,7 +83,7 @@ processor.h - Main module of system that is responsible for execution.
 
 processor.cpp - Implementation of main module.
 
-memory.h - Mimics hardware RAM where data can be read and written. Implemented for LOAD/STORE instructions.
+memory.h - Mimics hardware RAM where data can be read from and written to. Implemented for LOAD/STORE instructions.
 
 files/ - Contains all the files used during testing.
 
@@ -91,8 +91,15 @@ files/SimpleAddTest - Used to initally test Execute() method. It is adding the v
 
 files/SimpleFactorialAssembly.txt - This is the binary form of the SimpleFactorialProgram.cpp. It calculates the factorial of 4 by using a combination of LDI, ADD, CMP, MUL, ADDI and JMP instructions.
 
-test-processor.cpp - Uses the googletest-release-1.12.1 to allow for test-driven
-developement of each module and function that was implemented. The last three tests name ExecuteInstructionAddTest, ExecuteInstructionFactorialTestDebugging and ExecuteInstructionFactorialTestOutput provide the output of the Execute method. The ExecuteInstructionAddTest inputs the SimpleAddTest.txt file and displays the debug of the instructions execution. Similarly ExecuteInstructionFactorialTestDebugging inputs the SimpleFactorialAssembly.txt. The ExecuteInstructionFactorialTestOutput also inputs the SimpleFactorialAssembly.txt but displays the factorial value calculated at each iteration.
+test-processor.cpp - Uses the googletest-release-1.12.1 to allow for test-driven developement of each module and function that was implemented.
+
+The last three tests name ExecuteInstructionAddTest,ExecuteInstructionFactorialTestDebugging and ExecuteInstructionFactorialTestOutput provide the output of the Execute method.
+
+The ExecuteInstructionAddTest inputs the SimpleAddTest.txt file and displays the debug of the instructions execution.
+
+Similarly ExecuteInstructionFactorialTestDebugging inputs the SimpleFactorialAssembly.txt and displays the debug of the instructions execution.
+
+The ExecuteInstructionFactorialTestOutput also inputs the SimpleFactorialAssembly.txt but displays the factorial value calculated at each iteration.
 
 Processor
 -------------
@@ -108,6 +115,6 @@ Memory m
 
 status registers that are represented by boolean flags => bool underflow, overflow, equalFlag, haltFlag
 
-An incrmenting object viz the Program counter that keeps track of the instructions => ProgramCounter
+An incrementing object viz the Program counter that keeps track of the instructions => ProgramCounter
 
 It consists of helper method to return the private data so that it can be tested. It also consists of method that perform actions on the instructions.
