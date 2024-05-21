@@ -8,9 +8,9 @@ Building Project
 This was built and tested on WSL-Ubuntu-20.04. The compiler used was GNU 9.4.0. The IDE was VS code with CMake, CMakeTools and C/C++ IntelliSense extensions. C++17 was used.
 
 To build and run follow the steps below.
-mkdir build && cd build
-cmake ..
-make -j4
+mkdir build && cd build<br/>
+cmake ..<br/>
+make -j4<br/>
 ./test-processor
 
 A snippet of the expected output when building and running the program.
