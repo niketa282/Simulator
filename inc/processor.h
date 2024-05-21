@@ -10,7 +10,7 @@ namespace Emulator {
 
 // Single Instruction struct, that is populated based on opcode in Decode function
 struct Instruction {
-  enum Operation : char {NOP, ADD, SUB, LOAD, LDI, STORE, CMP, HALT, JMP} op;
+  enum Operation : char {NOP, ADD, SUB, LOAD, LDI, STORE, CMP, HALT, JMP, MUL, ADDI} op;;
   std::array<unsigned char,3> operandRegNum;
   unsigned char immediateOrAddress = 0;
 };

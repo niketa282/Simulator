@@ -125,7 +125,7 @@ TEST(Processor, populateInstructionMemory) {
   Processor p{};
   auto &instructionMemory = p.getInstructionMemory();
   EXPECT_EQ(instructionMemory.size(), 0);
-  p.populateInstructionMemory("files/binaryDataTest.txt");
+  p.populateInstructionMemory("../files/binaryDataTest.txt");
   EXPECT_EQ(instructionMemory.size(), 3);
   for(auto& iMem: instructionMemory)
   {
@@ -136,17 +136,27 @@ TEST(Processor, populateInstructionMemory) {
 TEST(Processor, fetchInstruction) {
   Processor p{};
   auto &ProgramCounter = p.getProgramCounter();
-  ProgramCounter = 2;
-  p.populateInstructionMemory("files/binaryDataTest.txt");
-  p.fetchInstruction(ProgramCounter);
-  EXPECT_EQ(p.fetchInstruction(ProgramCounter), "0011000101110000");
+ // ProgramCounter = 2;
+  p.populateInstructionMemory("../files/binaryDataTest.txt");
+  auto iMem = p.getInstructionMemory();
+  std::vector<std::string> output{};
+  while(ProgramCounter < iMem.size()) {
+    output.push_back(p.fetchInstruction(ProgramCounter));
+    ++ProgramCounter;
+  }
+
+  EXPECT_EQ(output[0], "0000000100100011");
+  EXPECT_EQ(output[1], "0001010001010110");
+  EXPECT_EQ(output[2], "0011000101110000");
+  //p.fetchInstruction(ProgramCounter);
+ // EXPECT_EQ(p.fetchInstruction(ProgramCounter), "0011000101110000");
 }
 
 TEST(Processor, decodeInstructions) {
   Processor p{};
   Instruction i{};
   auto &ProgramCounter = p.getProgramCounter();
-  p.populateInstructionMemory("files/InstructionsDecodingData.txt");
+  p.populateInstructionMemory("../files/InstructionsDecodingData.txt");
   std::string Instruction = p.fetchInstruction(ProgramCounter);
   EXPECT_EQ(i.op, Instruction::NOP);
 
@@ -186,9 +196,16 @@ TEST(Processor, decodeInstructions) {
   EXPECT_EQ(i.immediateOrAddress, 2);
 }
 
-TEST(Processor, ExecuteInstruction) {
+TEST(Processor, ExecuteInstructionAddTest) {
   Processor p{};
-  p.Execute("files/SimpleAddTest.txt");
+  p.Execute("../files/SimpleAddTest.txt");
   auto &instructionMemory = p.getInstructionMemory();
   EXPECT_EQ(instructionMemory.size(), 4);
+}
+
+TEST(Processor, ExecuteInstructionFactorialTest) {
+  Processor p{};
+  p.Execute("../files/SimpleFactorialAssembly.txt");
+  auto &instructionMemory = p.getInstructionMemory();
+  EXPECT_EQ(instructionMemory.size(), 8);
 }

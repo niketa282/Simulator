@@ -84,9 +84,10 @@ case Instruction::CMP:
   if (debug)
   {
     std::cout << "CMP \n";
-    std::cout << "Compare Value " << int{registerBank[instr.operandRegNum[0]]} << " in Reg " << int{instr.operandRegNum[0]} << " with Value "<< int{registerBank[instr.operandRegNum[1]]}<< "in Reg" << int{instr.operandRegNum[1]} << "\n";
+    std::cout << "Compare Value " << int{registerBank[instr.operandRegNum[0]]} << " in Reg " << int{instr.operandRegNum[0]} << " with Value "<< int{registerBank[instr.operandRegNum[1]]}<< " in Reg " << int{instr.operandRegNum[1]} << "\n";
   }
   registerBank[instr.operandRegNum[0]] == registerBank[instr.operandRegNum[1]] ? equalFlag = true : equalFlag = false;
+  if(equalFlag) haltFlag = true;
   break;
 }
 
@@ -104,6 +105,34 @@ case Instruction::JMP:
     std::cout << "JMP " << "Program counter jumps to address " << int{instr.immediateOrAddress} << "\n";
   }
   ProgramCounter = instr.immediateOrAddress;
+  break;
+}
+
+case Instruction::MUL:
+{
+  if (debug)
+  {
+   std::cout << "MUL \n";
+   std::cout << "Value in Reg " << int{instr.operandRegNum[0]} << " is " << int{registerBank[instr.operandRegNum[0]]} << "\n";
+   std::cout << "Value in Reg " << int{instr.operandRegNum[1]} << " is " << int{registerBank[instr.operandRegNum[1]]} << "\n";
+   std::cout << "Output into Reg "<< int{instr.operandRegNum[2]} << " = " << int{registerBank[instr.operandRegNum[0]]} << " * " << int{registerBank[instr.operandRegNum[1]]} << "\n";
+  }
+  registerBank[instr.operandRegNum[2]] = registerBank[instr.operandRegNum[0]] * registerBank[instr.operandRegNum[1]];
+  if (debug) std::cout << "Value in Reg " << int{instr.operandRegNum[2]} << " is " << int{registerBank[instr.operandRegNum[2]]} << "\n";
+  break;
+}
+
+case Instruction::ADDI:
+{
+  if (debug)
+  {
+   std::cout << "ADDI \n";
+   std::cout << "Value in Reg " << int{instr.operandRegNum[1]} << " is " << int{registerBank[instr.operandRegNum[0]]} << "\n";
+   std::cout << "Immediate Value is " << int{instr.immediateOrAddress} << "\n";
+   std::cout << "Output into Reg "<< int{instr.operandRegNum[2]} << " = " << int{registerBank[instr.operandRegNum[1]]} << " + " << int{instr.immediateOrAddress} << "\n";
+  }
+  registerBank[instr.operandRegNum[2]] = registerBank[instr.operandRegNum[1]] + int{instr.immediateOrAddress};
+  if (debug) std::cout << "Value in Reg " << int{instr.operandRegNum[2]} << " is " << int{registerBank[instr.operandRegNum[2]]} << "\n";
   break;
 }
 
@@ -143,13 +172,14 @@ void Emulator::Processor::Execute(std::string const& filename)
   populateInstructionMemory(filename);
   while (ProgramCounter < InstructionMemory.size() && haltFlag != true) {
     std::string Instruction = fetchInstruction(ProgramCounter);
+    ++ProgramCounter;
     Emulator::Instruction i = decodeInstruction(Instruction);
     runInstruction(i, true);
-    ++ProgramCounter;
   }
 }
 
 std::string Emulator::Processor::fetchInstruction(unsigned char const& ProgramCounter) const {
+  std::cout << "PC is "<< int{ProgramCounter} << "\n";
   return InstructionMemory[ProgramCounter];
 }
 
@@ -174,6 +204,7 @@ Emulator::Instruction Emulator::Processor::decodeInstruction(std::string const& 
 
     case Instruction::ADD:
     case Instruction::SUB:
+    case Instruction::MUL:
       i.operandRegNum[0] = convertStringToChar(Instruction.substr(12,4)).second;
       i.operandRegNum[1] = convertStringToChar(Instruction.substr(8,4)).second;
       i.operandRegNum[2] = convertStringToChar(Instruction.substr(4,4)).second;
@@ -196,6 +227,12 @@ Emulator::Instruction Emulator::Processor::decodeInstruction(std::string const& 
 
     case Instruction::JMP:
       i.immediateOrAddress = convertStringToChar(Instruction.substr(4,8)).second;
+      break;
+
+    case Instruction::ADDI:
+      i.operandRegNum[1] = convertStringToChar(Instruction.substr(8,4)).second;
+      i.operandRegNum[2] = convertStringToChar(Instruction.substr(4,4)).second;
+      i.immediateOrAddress = convertStringToChar(Instruction.substr(12,4)).second;
       break;
   }
   return i;
